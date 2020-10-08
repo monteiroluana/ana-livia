@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>MAP - Ana Lívia</title>
+	<!-- Lib CSS Leaflet -->
+ 	<link rel="stylesheet" href="dist/css/leaflet.css"/>
+	<!-- Lib CSS Leaflet DRAW -->
+	<link rel="stylesheet" href="dist/css/leaflet.draw.css"/>
+	
+	
+	<style>
+		body{margin: 0;}
+		#mapid{height:100vh; width:80vw;float: left;}
+		#texto{height:100vh; width:19vw;float: right;}
+	</style>
+</head>
+<body>
+	<div id="mapid"></div>
+	<div id="texto"></div>
+	
+
+	<!-- Lib JS Leaflet -->
+	<script src="dist/js/leaflet.js"></script>
+	<!-- Lib JS Leaflet DRAW -->
+	<script src="dist/js/leaflet.draw.js"></script>
+	
+	<script>
+		"use strict"
+		
+		/* ---------------------------------------------------
+			CREATE MAP
+		----------------------------------------------------- */
+		// 'mapid' id da div que vai conter o mapa
+		var map = L.map('mapid').setView([37.8, -96], 3);
+
+		// "fundo" do mapa
+		var street = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+            			attribution: 'SciCrop',
+            			maxZoom: 18,
+            			id: 'mapbox.streets', 
+            			accessToken: 'pk.eyJ1IjoibW9udGVpcm9sdWFuYSIsImEiOiJjam80Y3c1MDUxNnEyM3FwaDNxajFqZWF4In0.6KYMVXUlI5_Q6oSGJuBn2A' 
+        	});
+		// adicionando o fundo ao mapa
+		street.addTo(map);
+
+
+		/* ---------------------------------------------------
+			DRAW CONTROL
+		----------------------------------------------------- */
+		var drawnItems = new L.FeatureGroup();
+		map.addLayer(drawnItems);
+		var drawControl = new L.Control.Draw({
+			draw: {
+				polygon: true,
+				polyline: false,
+				rectangle: false,
+				marker: false,
+				circle: false,
+				circlemarker: false
+			},
+			edit: {
+				featureGroup: drawnItems,
+				edit: false,
+				remove: false
+			}
+		});
+		map.addControl(drawControl);
+
+		map.on('draw:drawstart', function (e) { drawnItems = new L.FeatureGroup(); });
+		map.on(L.Draw.Event.CREATED, function (event) {
+			var layer = event.layer;
+			drawnItems.addLayer(layer);
+
+			// mostrando o geojson na tela
+			const geojson = layer.toGeoJSON().geometry
+	
+			document.getElementById('texto').innerHTML =JSON.stringify(geojson)
+		});
+
+	</script>
+</body>
